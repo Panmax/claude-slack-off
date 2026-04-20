@@ -6,8 +6,18 @@
   "bin": {
     "claude-slack-off": "./dist/bin/cli.js"
   },
+  "main": "./dist/src/app.js",
+  "files": [
+    "dist",
+    "bin",
+    "src",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "dev": "tsx bin/cli.ts",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -16,8 +26,14 @@
     "cli",
     "tui",
     "ebook",
-    "reader"
+    "reader",
+    "claude",
+    "disguise"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/claude-slack-off"
+  },
   "license": "MIT",
   "dependencies": {
     "cheerio": "^1.2.0",
