@@ -11,6 +11,19 @@ export class BookParser {
     private linesPerPage: number = 20
   ) {}
 
+  static fromContent(title: string, content: string, linesPerPage: number = 20): BookParser {
+    const bp = new BookParser("", linesPerPage);
+    bp.lines = content.split("\n");
+    const totalPages = Math.ceil(bp.lines.length / bp.linesPerPage);
+    bp.meta = {
+      filePath: "",
+      title,
+      format: "txt",
+      totalPages,
+    };
+    return bp;
+  }
+
   async load(): Promise<BookMeta> {
     const ext = path.extname(this.filePath).toLowerCase();
     if (ext === ".txt") {

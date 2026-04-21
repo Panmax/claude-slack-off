@@ -7,13 +7,15 @@ import type { BookPage, BookMeta } from "../../types/index.js";
 
 interface ReaderViewProps {
   filePath: string;
+  contentLines?: string[];
+  contentTitle?: string;
   storage: Storage;
   onToggleDisguise: () => void;
   onSwitchMode: () => void;
-  onContentUpdate?: (lines: string[]) => void;
+  onContentUpdate?: (lines: string[], title?: string) => void;
 }
 
-export function ReaderView({ filePath, storage, onToggleDisguise, onSwitchMode, onContentUpdate }: ReaderViewProps) {
+export function ReaderView({ filePath, contentLines, contentTitle, storage, onToggleDisguise, onSwitchMode, onContentUpdate }: ReaderViewProps) {
   const { exit } = useApp();
   const [parser, setParser] = useState<BookParser | null>(null);
   const [meta, setMeta] = useState<BookMeta | null>(null);
@@ -28,12 +30,20 @@ export function ReaderView({ filePath, storage, onToggleDisguise, onSwitchMode, 
     const init = async () => {
       const termHeight = process.stdout.rows ?? 24;
       const linesPerPage = termHeight - 6;
-      const bp = new BookParser(filePath, linesPerPage);
-      const m = await bp.load();
-      setParser(bp);
-      setMeta(m);
 
-      const bookmark = await storage.getBookmark(filePath);
+      let bp: BookParser;
+      if (contentLines && contentLines.length > 0) {
+        bp = BookParser.fromContent(contentTitle || "Web Page", contentLines.join("\n"), linesPerPage);
+      } else {
+        bp = new BookParser(filePath, linesPerPage);
+        await bp.load();
+      }
+
+      setParser(bp);
+      setMeta(bp.getMeta());
+
+      const bookmarkKey = filePath || contentTitle || "";
+      const bookmark = await storage.getBookmark(bookmarkKey);
       const startPage = bookmark?.page ?? 0;
       const p = bp.getPage(startPage);
       setPage(p);
@@ -41,7 +51,7 @@ export function ReaderView({ filePath, storage, onToggleDisguise, onSwitchMode, 
       setLoading(false);
     };
     init().catch(() => setLoading(false));
-  }, [filePath, storage]);
+  }, [filePath, contentLines, storage]);
 
   const goToPage = useCallback(
     async (n: number) => {
@@ -49,9 +59,10 @@ export function ReaderView({ filePath, storage, onToggleDisguise, onSwitchMode, 
       const p = parser.getPage(n);
       setPage(p);
       onContentUpdate?.(p.content.split("\n"));
-      await storage.saveBookmark(filePath, p.pageNumber);
+      const bookmarkKey = filePath || contentTitle || "";
+      await storage.saveBookmark(bookmarkKey, p.pageNumber);
     },
-    [parser, storage, filePath]
+    [parser, storage, filePath, contentTitle]
   );
 
   useInput((input, key) => {

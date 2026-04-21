@@ -1,6 +1,6 @@
 {
   "name": "claude-slack-off",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A CLI tool disguised as Claude Code for reading ebooks and browsing the web",
   "type": "module",
   "bin": {

@@ -18,6 +18,7 @@ export function App({ command, target, disguise = false, lang = "ts", speed = 5 
   const [appMode, setAppMode] = useState<AppMode>(command === "browse" ? "browser" : "reader");
   const [displayMode, setDisplayMode] = useState<DisplayMode>(disguise ? "disguise" : "normal");
   const [contentLines, setContentLines] = useState<string[]>([]);
+  const [contentTitle, setContentTitle] = useState<string>("");
 
   const storage = useMemo(
     () => new Storage(`${process.env.HOME}/.claude-slack-off`),
@@ -32,8 +33,9 @@ export function App({ command, target, disguise = false, lang = "ts", speed = 5 
     setAppMode((m) => (m === "reader" ? "browser" : "reader"));
   }, []);
 
-  const handleContentUpdate = useCallback((lines: string[]) => {
+  const handleContentUpdate = useCallback((lines: string[], title?: string) => {
     setContentLines(lines);
+    if (title !== undefined) setContentTitle(title);
   }, []);
 
   if (displayMode === "disguise") {
@@ -62,6 +64,8 @@ export function App({ command, target, disguise = false, lang = "ts", speed = 5 
   return (
     <ReaderView
       filePath={target ?? ""}
+      contentLines={contentLines.length > 0 ? contentLines : undefined}
+      contentTitle={contentTitle || undefined}
       storage={storage}
       onToggleDisguise={toggleDisguise}
       onSwitchMode={switchMode}

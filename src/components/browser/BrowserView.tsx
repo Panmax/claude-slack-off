@@ -11,7 +11,7 @@ interface BrowserViewProps {
   storage: Storage;
   onToggleDisguise: () => void;
   onSwitchMode: () => void;
-  onContentUpdate?: (lines: string[]) => void;
+  onContentUpdate?: (lines: string[], title?: string) => void;
 }
 
 export function BrowserView({ initialUrl, storage, onToggleDisguise, onSwitchMode, onContentUpdate }: BrowserViewProps) {
@@ -32,7 +32,7 @@ export function BrowserView({ initialUrl, storage, onToggleDisguise, onSwitchMod
       try {
         const result = await fetchPage(url);
         setPage(result);
-        onContentUpdate?.(result.content.split("\n"));
+        onContentUpdate?.(result.content.split("\n"), result.title);
         await storage.addHistory(url, result.title);
         setHistory((h) => [...h.slice(0, historyIndex + 1), url]);
         setHistoryIndex((i) => i + 1);
